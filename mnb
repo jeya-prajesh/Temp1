@@ -1,0 +1,14 @@
+try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (String[] rowData : data) {
+                StringBuilder line = new StringBuilder();
+                for (String cellData : rowData) {
+                    line.append(cellData).append(",");
+                }
+                // Remove the last comma and write the line
+                writer.write(line.substring(0, line.length() - 1));
+                writer.newLine();
+            }
+            System.out.println("CSV file written successfully.");
+        } catch (IOException e) {
+            System.err.println("Error writing CSV file: " + e.getMessage());
+        }
