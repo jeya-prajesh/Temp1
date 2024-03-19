@@ -1,0 +1,27 @@
+import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+@Component({
+  selector: 'app-your-component',
+  templateUrl: './your-component.component.html',
+  styleUrls: ['./your-component.component.css']
+})
+export class YourComponent {
+  constructor(private http: HttpClient) {}
+
+  process(): void {
+    this.upload().then(() => {
+      return this.generate();
+    }).catch(error => {
+      console.error('Error:', error);
+    });
+  }
+
+  upload(): Promise<any> {
+    return this.http.post<any>('/upload', {}).toPromise();
+  }
+
+  generate(): Promise<any> {
+    return this.http.post<any>('/generate', {}).toPromise();
+  }
+}
