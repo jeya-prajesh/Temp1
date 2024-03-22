@@ -1,0 +1,85 @@
+import java.io.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+
+public class ParallelFileProcessing {
+
+    public static void main(String[] args) {
+        final long startTime = System.currentTimeMillis();
+        System.out.println("Dividing input file into 5 parts...");
+        
+        // Divide the input file into 5 parts
+        List<File> inputParts = divideInputFile("20 lakh rec.txt", 5);
+
+        // Create an ExecutorService with a thread pool size of 5
+        ExecutorService executor = Executors.newFixedThreadPool(5);
+
+        // Submit tasks for each part of the input file
+        Future<?>[] futures = new Future[5];
+        for (int i = 0; i < 5; i++) {
+            final File inputFilePart = inputParts.get(i);
+            futures[i] = executor.submit(() -> {
+                // Task to process each part of the input file
+                File configFile = new File("textcheck.csv");
+                File outputFile = new File("output_" + i + ".csv");
+                createCsvDataSimple(inputFilePart, configFile, outputFile);
+                loadToOracle(outputFile);
+            });
+        }
+
+        // Shutdown the executor
+        executor.shutdown();
+
+        // Wait for all tasks to complete
+        for (Future<?> future : futures) {
+            try {
+                future.get(); // Waits for the task to complete
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        final long endTime = System.currentTimeMillis();
+        System.out.println("All tasks completed.");
+        System.out.println("Total execution time: " + (endTime - startTime));
+    }
+
+    public static List<File> divideInputFile(String inputFileName, int numParts) {
+        List<File> inputParts = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(inputFileName))) {
+            long totalLines = br.lines().count();
+            long linesPerPart = totalLines / numParts;
+            for (int i = 0; i < numParts; i++) {
+                File partFile = new File("input_part_" + i + ".txt");
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter(partFile))) {
+                    long linesWritten = 0;
+                    String line;
+                    while ((line = br.readLine()) != null && linesWritten < linesPerPart) {
+                        bw.write(line);
+                        bw.newLine();
+                        linesWritten++;
+                    }
+                }
+                inputParts.add(partFile);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return inputParts;
+    }
+
+    public static void createCsvDataSimple(File inputFile, File configFile, File outputFile) {
+        // Your existing CSV generation logic
+    }
+
+    public static void loadToOracle(File csvFile) {
+        // Your existing Oracle loading logic
+    }
+}
