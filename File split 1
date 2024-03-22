@@ -1,0 +1,32 @@
+public static List<File> divideInputFile(String inputFileName, int numParts) {
+    List<File> inputParts = new ArrayList<>();
+    try (BufferedReader br = new BufferedReader(new FileReader(inputFileName))) {
+        long totalLines = br.lines().count();
+        long linesPerPart = totalLines / numParts;
+        long remainingLines = totalLines % numParts; // Calculate remaining lines
+        for (int i = 0; i < numParts; i++) {
+            File partFile = new File("input_part_" + i + ".txt");
+            try (BufferedWriter bw = new BufferedWriter(new FileWriter(partFile))) {
+                // Write lines for this part
+                long linesWritten = 0;
+                String line;
+                while ((line = br.readLine()) != null && linesWritten < linesPerPart) {
+                    bw.write(line);
+                    bw.newLine();
+                    linesWritten++;
+                }
+                // Add remaining lines to the last part
+                if (i == numParts - 1 && remainingLines > 0) {
+                    while ((line = br.readLine()) != null) {
+                        bw.write(line);
+                        bw.newLine();
+                    }
+                }
+            }
+            inputParts.add(partFile);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    return inputParts;
+}
