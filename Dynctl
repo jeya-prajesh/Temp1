@@ -1,0 +1,67 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class ControlFileGenerator {
+
+    public static void generateControlFile(int numberOfFiles) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter("your_control_file.ctl"));
+
+            writer.write("OPTIONS (SKIP=0)");
+            writer.newLine();
+            writer.write("LOAD DATA");
+            writer.newLine();
+
+            // Generate INFILE lines based on the number of files
+            for (int i = 0; i < numberOfFiles; i++) {
+                writer.write("INFILE 'output_" + (i + 1) + ".csv'");
+                writer.newLine();
+            }
+
+            writer.write("TAPPEND");
+            writer.newLine();
+            writer.write("INTO TABLE FLOT_FACT4");
+            writer.newLine();
+            writer.write("fields terminated by \",\"");
+            writer.newLine();
+            writer.write("TRAILING NULLCOLS");
+            writer.newLine();
+            writer.write("(");
+            writer.newLine();
+            writer.write("COMPANY,");
+            writer.newLine();
+            writer.write("ACCOUNT,");
+            writer.newLine();
+            writer.write("FUND,");
+            writer.newLine();
+            writer.write("CPOST_DATE,");
+            writer.newLine();
+            writer.write("SEQUENCE_NUMBER,");
+            writer.newLine();
+            writer.write("t ASSET_TYPE,");
+            writer.newLine();
+            writer.write("ORIG_PURCHASE_DATE,");
+            writer.newLine();
+            writer.write("FE_PRIVLEGE_FACTOR,");
+            writer.newLine();
+            writer.write("CFE_ORIG_PRIV_FACTOR,");
+            writer.newLine();
+            writer.write("BE_PRIVLEGE_FACTOR,");
+            writer.newLine();
+            writer.write("CDSC_PCT_LIABILITY");
+            writer.newLine();
+            writer.write(")");
+            writer.newLine();
+
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        // Example usage: generate control file for 3 files
+        generateControlFile(3);
+    }
+}
