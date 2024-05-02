@@ -1,0 +1,19 @@
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class Main {
+    public static void main(String[] args) {
+        String input = "          375275 Rows successfully loaded";
+        int number = extractNumber(input);
+        System.out.println("Extracted number: " + number);
+    }
+
+    public static int extractNumber(String input) {
+        Pattern pattern = Pattern.compile("\\b\\d+\\b");
+        Matcher matcher = pattern.matcher(input);
+        if (matcher.find()) {
+            return Integer.parseInt(matcher.group());
+        }
+        return -1; // Or handle it according to your needs
+    }
+}
