@@ -1,0 +1,24 @@
+public class Main {
+    public static void main(String[] args) {
+        String input = "Elapsed time was:             00:00:01.69";
+        int elapsedTimeInMs = extractElapsedTime(input);
+        System.out.println("Elapsed time in milliseconds: " + elapsedTimeInMs);
+    }
+
+    public static int extractElapsedTime(String input) {
+        String[] parts = input.split("\\s+");
+        String timePart = parts[parts.length - 1]; // Assuming the time part is at the end
+        String[] timeComponents = timePart.split(":|\\.");
+
+        
+        int hours = Integer.parseInt(timeComponents[0]);
+        int minutes = Integer.parseInt(timeComponents[1]);
+        int seconds = Integer.parseInt(timeComponents[2]);
+        int milliseconds = Integer.parseInt(timeComponents[3]);
+
+        
+        int totalMilliseconds = (hours * 3600 + minutes * 60 + seconds) * 1000 + milliseconds;
+
+        return totalMilliseconds;
+    }
+}
