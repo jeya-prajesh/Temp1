@@ -1,0 +1,53 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class SqlldrLogReader {
+    public static void main(String[] args) {
+        String logFilePath = "path_to_your_sqlldr_log_file.log";
+        int rowsInserted = 0;
+        int rowsNotLoaded = 0;
+        long elapsedTime = 0;
+        
+        try (BufferedReader br = new BufferedReader(new FileReader(logFilePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.contains("Rows successfully loaded")) {
+                    rowsInserted = extractNumber(line);
+                } else if (line.contains("Rows not loaded")) {
+                    rowsNotLoaded = extractNumber(line);
+                } else if (line.contains("Elapsed time")) {
+                    elapsedTime = extractTime(line);
+                }
+            }
+            System.out.println("Rows inserted: " + rowsInserted);
+            System.out.println("Rows not loaded: " + rowsNotLoaded);
+            System.out.println("Elapsed time: " + elapsedTime + " milliseconds");
+            // You can store these values in your log table or use them as needed.
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    private static int extractNumber(String line) {
+        String[] parts = line.split(":");
+        return Integer.parseInt(parts[1].trim());
+    }
+    
+    private static long extractTime(String line) {
+        String[] parts = line.split(":");
+        String timePart = parts[1].trim();
+        String[] timeUnits = timePart.split("\\s+");
+        long milliseconds = 0;
+        for (int i = 0; i < timeUnits.length; i += 2) {
+            long value = Long.parseLong(timeUnits[i]);
+            String unit = timeUnits[i + 1];
+            if (unit.startsWith("m")) {
+                milliseconds += value * 60 * 1000;
+            } else if (unit.startsWith("s")) {
+                milliseconds += value * 1000;
+            }
+        }
+        return milliseconds;
+    }
+}
