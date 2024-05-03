@@ -1,0 +1,40 @@
+import java.io.*;
+
+public class ModifySpecificLine {
+    public static void main(String[] args) {
+        // File path
+        String filePath = "your_file_path.txt";
+        // Line number to modify
+        int lineNumber = 5;
+        // New content for the line
+        String newContent = "New content for line 5";
+
+        try {
+            // Read the original file
+            BufferedReader reader = new BufferedReader(new FileReader(filePath));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line;
+            int currentLine = 1;
+            while ((line = reader.readLine()) != null) {
+                if (currentLine == lineNumber) {
+                    // Modify the specific line
+                    stringBuilder.append(newContent).append("\n");
+                } else {
+                    // Keep other lines unchanged
+                    stringBuilder.append(line).append("\n");
+                }
+                currentLine++;
+            }
+            reader.close();
+
+            // Write the modified content back to the file
+            BufferedWriter writer = new BufferedWriter(new FileWriter(filePath));
+            writer.write(stringBuilder.toString());
+            writer.close();
+
+            System.out.println("Line " + lineNumber + " modified successfully.");
+        } catch (IOException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+}
