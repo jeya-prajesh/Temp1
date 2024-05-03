@@ -1,0 +1,73 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+public class SQLLoaderExample {
+
+    public static void main(String[] args) {
+        String command = "sqlldr username/password@database control=your_control_file.ctl log=your_log_file.log discard=your_discard_file.dsc";
+        
+        try {
+            Process process = Runtime.getRuntime().exec(command);
+            int exitCode = process.waitFor();
+            
+            if (exitCode == 0) {
+                System.out.println("SQL*Loader executed successfully.");
+                insertDiscardedRecords("your_discard_file.dsc");
+            } else {
+                System.err.println("SQL*Loader execution failed. Check log file for details.");
+            }
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void insertDiscardedRecords(String discardFilePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(discardFilePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] values = line.split(","); // Assuming values are comma-separated
+                insertRecord(values);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void insertRecord(String[] values) {
+        // Adjust connection parameters accordingly
+        String url = "jdbc:mysql://localhost:3306/database_name";
+        String username = "username";
+        String password = "password";
+
+        try (Connection conn = DriverManager.getConnection(url, username, password)) {
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.append("INSERT INTO your_table_name VALUES (");
+            for (int i = 0; i < values.length; i++) {
+                sqlBuilder.append("?, ");
+            }
+            // Remove the last comma and space
+            sqlBuilder.delete(sqlBuilder.length() - 2, sqlBuilder.length());
+            sqlBuilder.append(")");
+            
+            String sql = sqlBuilder.toString();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+
+            // Set values for the prepared statement
+            for (int i = 0; i < values.length; i++) {
+                pstmt.setString(i + 1, values[i]);
+            }
+
+            // Execute the insert statement
+            pstmt.executeUpdate();
+            System.out.println("Inserted record: " + String.join(", ", values));
+        } catch (SQLException e) {
+            System.err.println("Error inserting record: " + String.join(", ", values));
+            e.printStackTrace();
+        }
+    }
+}
