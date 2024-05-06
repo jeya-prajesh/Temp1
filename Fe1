@@ -1,0 +1,27 @@
+@RestController
+@RequestMapping("/api/files")
+public class FilesController {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate; // Assuming you're using JDBC template
+
+    @GetMapping
+    public List<FileDTO> getAllFiles() {
+        List<FileDTO> files = new ArrayList<>();
+        String query = "SELECT file_name, file_data FROM files_table";
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(query);
+
+        for (Map<String, Object> row : rows) {
+            String fileName = (String) row.get("file_name");
+            byte[] fileData = (byte[]) row.get("file_data");
+            String fileDataBase64 = Base64.getEncoder().encodeToString(fileData);
+
+            FileDTO fileDTO = new FileDTO();
+            fileDTO.setFileName(fileName);
+            fileDTO.setFileData(fileDataBase64);
+            files.add(fileDTO);
+        }
+
+        return files;
+    }
+}
