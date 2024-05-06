@@ -1,0 +1,65 @@
+@RestController
+@RequestMapping("/api/files")
+public class FilesController {
+
+    @Autowired
+    private FilesRepository filesRepository;
+
+    @GetMapping
+    public List<FileDTO> getAllFiles() {
+        List<FileDTO> files = new ArrayList<>();
+        List<FilesEntity> filesEntities = filesRepository.findAll(); // Assuming you have a JPA repository
+
+        for (FilesEntity entity : filesEntities) {
+            FileDTO fileDTO = new FileDTO();
+            fileDTO.setFileName(entity.getFileName());
+            fileDTO.setFileData(Base64.getEncoder().encodeToString(entity.getFileData())); // Convert BLOB to Base64
+            files.add(fileDTO);
+        }
+
+        return files;
+    }
+}
+
+
+export interface File {
+  fileName: string;
+  fileData: string; // Base64 encoded file data
+}
+
+@Component({
+  selector: 'app-files',
+  templateUrl: './files.component.html',
+  styleUrls: ['./files.component.css']
+})
+export class FilesComponent implements OnInit {
+
+  files: File[];
+
+  constructor(private http: HttpClient) { }
+
+  ngOnInit(): void {
+    this.http.get<File[]>('http://localhost:8080/api/files').subscribe(data => {
+      this.files = data;
+    });
+  }
+
+}
+
+<table>
+  <thead>
+    <tr>
+      <th>File Name</th>
+      <th>File</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let file of files">
+      <td>{{ file.fileName }}</td>
+      <td>
+        <a [href]="'data:application/octet-stream;base64,' + file.fileData" download="{{ file.fileName }}">Download</a>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
