@@ -1,0 +1,24 @@
+import java.net.URI;
+import java.net.URISyntaxException;
+
+public class LdapUrlParser {
+
+    public static void main(String[] args) {
+        String ldapUrl = "ldap://example.com:389/ou=People,dc=example,dc=com";
+
+        try {
+            URI uri = new URI(ldapUrl);
+            String hostname = uri.getHost();
+            int port = uri.getPort();
+
+            if (hostname == null || port == -1) {
+                throw new IllegalArgumentException("Invalid LDAP URL: " + ldapUrl);
+            }
+
+            System.out.println("Hostname: " + hostname);
+            System.out.println("Port: " + port);
+        } catch (URISyntaxException e) {
+            System.err.println("Invalid LDAP URL: " + e.getMessage());
+        }
+    }
+}
